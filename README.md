@@ -12,6 +12,12 @@ npm run dev
 ```bush
 npm run build
 ```
+## 实现功能： 
+    复制/粘贴
+    移动画布
+    缩放
+    undo/redo
+    
 
 # fabric.js使用笔记
 ### 对象
@@ -57,6 +63,7 @@ npm run build
     setColor(color) = canvas.set("full","");
     rotate() 设置旋转角度
     setCoords() 设置坐标
+    canvas.calcViewportBoundaries() 计算画布4角的位置
 
 ### 事件
     object:added
@@ -77,6 +84,7 @@ npm run build
     mouse:over
     mouse:out
     mouse:dblclick
+    after:render
     selected（个别物件事件）
 
 ### 常用属性

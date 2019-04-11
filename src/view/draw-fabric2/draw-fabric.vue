@@ -1,18 +1,29 @@
 <template>
   <div class="container">
-      <ul :class="value ? 'collapsed' : ''">
-        <li class="pattern" draggable @mousedown="savePattern" v-for="(item, index) in tools" :key="index">
-          <img :src="item.icon" alt="" :title="item.type" >
-        </li>
-      </ul>
-      <canvas id="c"></canvas>
-      <div class="tip">
-        <div class="scale">
-          <span>{{size}}m</span>
-          <img src="scale.svg" alt="">
-        </div>
-        <div class="compass"><img src="compass.svg" alt=""></div>
+    <ul :class="value ? 'collapsed' : ''">
+      <li class="pattern" draggable @mousedown="savePattern" v-for="(item, index) in tools" :key="index">
+        <img :src="item.icon" alt="" :title="item.type" >
+      </li>
+    </ul>
+
+    <canvas id="c"></canvas>
+
+    <div class="tip">
+      <div class="scale">
+        <span>{{size}}m</span>
+        <img src="scale.svg" alt="">
       </div>
+      <div class="compass"><img src="compass.svg" alt=""></div>
+    </div>
+
+    <Modal
+      title="信息录入"
+      v-model="showModal"
+      :mask-closable="false"
+      @on-ok="addNew"
+      @on-cancel="cancelAdd">
+      <i-input v-model="employeeID" placeholder="请输入员工号..." style="width: 100%"></i-input>
+    </Modal>
   </div>
 </template>
 
@@ -21,6 +32,9 @@
   export default {
     data () {
       return {
+        showModal: false,
+        employeeID: '',
+        newObj: null,// 新增加对象
         tools: [
           {
             icon: 'staff.jpg',
@@ -29,6 +43,10 @@
           {
             icon: 'leader.jpg',
             type: 'leader'
+          },
+          {
+            icon: 'rect.png',
+            type: 'rect'
           },
         ],
         movingTarget: null,// 移动对象
@@ -41,7 +59,11 @@
         redo: [],
         undo: [],
         scale: 0.2,
-        size: 1000
+        size: 1000,
+        moveDelta: {
+          x: 0,
+          y: 0
+        }
       }
     },
     props: {
@@ -92,13 +114,9 @@
               _this.paste();
               break; // ctrl + v
           }
-        } else {
-          switch (keynum) {
-            case 46:
-              e.preventDefault();
-              _this.deteItem();
-              break;
-          }
+        } else if (keynum == 46) {
+           e.preventDefault();
+            _this.deteItem();
         }
       });
       // 拖拽
@@ -111,7 +129,7 @@
         if (e.e.ctrlKey) {
           e.e.preventDefault()
           const deltaY = e.e.deltaY
-          const newZoom = deltaY / 1000
+          const newZoom = deltaY > 0 ? 0.1 : -0.1
           this.setZoom(newZoom, { x: e.e.offsetX, y: e.e.offsetY })
         }
       })
@@ -119,18 +137,18 @@
       let isDragging = false
       canvas.on('mouse:down', (e) => {
         var selections = canvas.getActiveObjects()
-        if (selections.length == 0) {
+        if (selections.length == 0 && !e.e.shiftKey) {
           isDragging = true
           canvas.selection = false
         }
       })
-      canvas.on('mouse:move', function (e) {
+      canvas.on('mouse:move', (e) => {
         if (isDragging) {
           var delta = new fabric.Point(e.e.movementX, e.e.movementY);
           canvas.relativePan(delta);
         }
       })
-      canvas.on('mouse:up', function (e) {
+      canvas.on('mouse:up', (e) => {
         isDragging = false
         canvas.selection = true
       })
@@ -140,11 +158,17 @@
         this.state = JSON.stringify(canvas);
         this.redo.length = 0;
       })
+      canvas.on("after:render", () => { 
+        var points = canvas.calcViewportBoundaries()
+        // console.log(points)
+        this.moveDelta.x = points.tl.x
+        this.moveDelta.y = points.tl.y
+      })
     },
     methods: {
       setZoom (zoom, point) {
         const newZoom = canvas.getZoom() + zoom
-        if (newZoom < 0.5) return;//禁止无限缩小
+        if (newZoom < 0.1) return;//禁止无限缩小
         canvas.zoomToPoint(point, newZoom)
         this.size = Number.parseInt(1000/newZoom)
       },
@@ -158,18 +182,29 @@
       drawPattern (e) {
         var _this = this
         const { offsetX, offsetY } = e.e;
-        let {dragOffset, movingTarget} = this
+        let {dragOffset, movingTarget, moveDelta} = this
         var rate = 34 / movingTarget.naturalWidth
-        const image = new fabric.Image(movingTarget, {
+        this.newObj = new fabric.Image(movingTarget, {
           width: movingTarget.naturalWidth,
           height: movingTarget.naturalHeight,
           scaleX: rate,
           scaleY: rate,
-          top: offsetY - 25 * rate,// 图片宽度的1/2
-          left: offsetX - 25 * rate
+          left: offsetX - 25 * rate + moveDelta.x,
+          top: offsetY - 25 * rate + moveDelta.y,
         })
-        canvas.add(image)
+        // canvas.add(image)
         this.state = JSON.stringify(canvas);
+        // 弹出对话框
+        this.showModal = true
+        this.employeeID = ''
+      },
+      addNew () {
+        var {newObj} = this
+        canvas.add(newObj)
+        this.newObj = null
+      },
+      cancelAdd () {
+        this.newObj = null
       },
       doUndo() {
         if (!this.undo.length) {
