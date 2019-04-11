@@ -120,10 +120,10 @@ canvas.add(line);
     hasRotatingPoint = false; 不能被旋转
     hasRotatingPoint 控制旋转点不可见
 
-    ```
-    fabric.Image.fromURL("300.jpg", function (oImg) {
-    　　canvas.add(oImg);
-    　　oImg.hasControls = oImg.hasBorders = false;
-    });
-    ```
+```
+fabric.Image.fromURL("300.jpg", function (oImg) {
+　　canvas.add(oImg);
+　　oImg.hasControls = oImg.hasBorders = false;
+});
+```
 
