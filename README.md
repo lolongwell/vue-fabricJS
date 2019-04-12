@@ -66,26 +66,89 @@ npm run build
     canvas.calcViewportBoundaries() 计算画布4角的位置
 
 ### 事件
-    object:added
-    object:removed
-    object:modified
-    object:rotating
-    object:scaling
-    object:moving
-    object:selected 这个方法v2已经废弃，使用selection:created替代，多选不会触发
-    before:selection:cleared
-    selection:cleared
-    selection:updated
-    selection:created
-    path:created
-    mouse:down
-    mouse:move
-    mouse:up
+#### Events handled by canvas
+    # General
+
+    after:render — fired continuously after each frame is rendered
+    before:render — fired before each frame is rendered
+    canvas:cleared — fired after a call to canvas.clear()
+    
+    # Mouse related
+
     mouse:over
     mouse:out
-    mouse:dblclick
-    after:render
-    selected（个别物件事件）
+    mouse:down — fired when mousedown event occurred on canvas
+    mouse:up — fired when mouseup event occurred on canvas
+    mouse:move — fired when the mouse is moving over the canvas
+    mouse:wheel - fired when using the scroll wheel
+    
+    # Object related
+
+    object:added — fired after object has been added
+    object:modified — fired after object is modified (moved, scaled, rotated)
+    object:moving — fired continuously during object movement
+    object:over — fired when mouse is over object (see example below)
+    object:out — fired when mouse is moved away from object (see example below)
+    object:removed — fired when object has been removed
+    object:rotating — fired continuously during object rotating
+    object:scaling — fired continuously during object scaling
+    object:selected — fired when object is selected
+    
+    # Path related
+
+    path:created — fired when (free-drawn) path is created
+    
+    #Selection related
+
+    before:selection:cleared — fired before selection is cleared (before active group is destroyed)
+    selection:cleared — fired after selection is cleared (after active group is destroyed)
+    selection:created — fired after selection is created (after active group is created)
+    
+    # Text related
+
+    text:editing:entered
+    text:editing:exited
+    text:selection:changed
+    text:changed
+
+#### Events handled by objects
+    # General
+
+    added
+    removed
+
+    # Mouse related
+
+    mousedown
+    mouseup
+    mouseover
+    mouseout
+    
+    # Modification related
+
+    modified
+    rotating
+    scaling
+    moving
+    skewing
+    
+    # Selection related
+
+    deselected
+    selected
+    
+    # Text related
+
+    editing:entered
+    editing:exited
+    selection:changed — cursor selection in iText has changed
+    changed
+    dblclick
+    tripleclick
+
+#### Demos and Examples
+    http://fabricjs.com/events
+    http://fabricjs.com/hovering
 
 ### 常用属性
     canvas.isDrawingMode = true; 可以自由绘制

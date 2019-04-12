@@ -2,7 +2,7 @@
   <div class="container">
     <ul :class="value ? 'collapsed' : ''">
       <li class="pattern" draggable @mousedown="savePattern" v-for="(item, index) in tools" :key="index">
-        <img :src="item.icon" alt="" :title="item.type" >
+        <img :src="item.icon" alt="" :title="item.type" :data-type="item.type">
       </li>
     </ul>
 
@@ -34,7 +34,7 @@
       return {
         showModal: false,
         employeeID: '',
-        newObj: null,// 新增加对象
+        newObj: null,// 新增对象
         tools: [
           {
             icon: 'staff.jpg',
@@ -50,10 +50,6 @@
           },
         ],
         movingTarget: null,// 移动对象
-        dragOffset: {
-          offsetX: 0,
-          offsetY: 0
-        },
         _clipboard: null,
         state: null,
         redo: [],
@@ -63,7 +59,7 @@
         moveDelta: {
           x: 0,
           y: 0
-        }
+        },
       }
     },
     props: {
@@ -72,7 +68,7 @@
     mounted () {
       var _this = this
       var canvas = (this.canvas = new fabric.Canvas('c', {
-        backgroundColor: 'white'
+        backgroundColor: '#dae4e4'
       }))
       window.canvas = canvas;
       window.zoom = window.zoom ? window.zoom : 1;
@@ -164,6 +160,12 @@
         this.moveDelta.x = points.tl.x
         this.moveDelta.y = points.tl.y
       })
+      canvas.on('mouse:dblclick', e => {
+        // console.log(e)
+        if (e.target) {
+          this.showModal = true
+        }
+      })
     },
     methods: {
       setZoom (zoom, point) {
@@ -174,37 +176,40 @@
       },
       savePattern (e) {
         if (e.target.tagName.toLowerCase() === "img") {
-          this.dragOffset.offsetX = e.clientX - e.offsetX;
-          this.dragOffset.offsetY = e.clientY - e.offsetY;
+          this.drawType = e.target.getAttribute("data-type")
           this.movingTarget = e.target;
         }
       },
       drawPattern (e) {
+        console.log(this.drawType)
         var _this = this
         const { offsetX, offsetY } = e.e;
-        let {dragOffset, movingTarget, moveDelta} = this
+        let {movingTarget, moveDelta} = this
         var rate = 34 / movingTarget.naturalWidth
+        var zoom = canvas.getZoom()
         this.newObj = new fabric.Image(movingTarget, {
           width: movingTarget.naturalWidth,
           height: movingTarget.naturalHeight,
           scaleX: rate,
           scaleY: rate,
-          left: offsetX - 25 * rate + moveDelta.x,
-          top: offsetY - 25 * rate + moveDelta.y,
+          // left: offsetX - movingTarget.naturalWidth * rate/2 + moveDelta.x,
+          // top: offsetY - movingTarget.naturalHeight * rate/2 + moveDelta.y,
+          left: (offsetX - movingTarget.naturalWidth * rate/2)/zoom + moveDelta.x ,
+          top: (offsetY - movingTarget.naturalHeight * rate/2)/zoom + moveDelta.y ,
         })
-        // canvas.add(image)
+        canvas.add(this.newObj)
         this.state = JSON.stringify(canvas);
-        // 弹出对话框
-        this.showModal = true
-        this.employeeID = ''
       },
       addNew () {
-        var {newObj} = this
-        canvas.add(newObj)
-        this.newObj = null
+        this.newObj.on('mouseover', e => {
+          console.log('确定')
+        })
+        this.newObj.on('mouseout', e => {
+          console.log('取消')
+        })
       },
       cancelAdd () {
-        this.newObj = null
+        
       },
       doUndo() {
         if (!this.undo.length) {
@@ -268,6 +273,9 @@
           // canvas.requestRenderAll();
         });
       },
+      drawStaff (config) {
+        
+      }
     },
   }
 </script>

@@ -123,7 +123,7 @@ export default [
       }
     ]
   },
-  /*{
+  {
     path: '',
     name: 'doc',
     meta: {
@@ -412,5 +412,5 @@ export default [
     },
     component: () => import('@/view/error-page/404.vue')
   }
-  */
+  
 ]
