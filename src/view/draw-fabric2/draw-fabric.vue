@@ -192,10 +192,8 @@
           height: movingTarget.naturalHeight,
           scaleX: rate,
           scaleY: rate,
-          // left: offsetX - movingTarget.naturalWidth * rate/2 + moveDelta.x,
-          // top: offsetY - movingTarget.naturalHeight * rate/2 + moveDelta.y,
-          left: (offsetX - movingTarget.naturalWidth * rate/2)/zoom + moveDelta.x ,
-          top: (offsetY - movingTarget.naturalHeight * rate/2)/zoom + moveDelta.y ,
+          left: offsetX/zoom - movingTarget.naturalWidth * rate/2 + moveDelta.x ,
+          top: offsetY/zoom - movingTarget.naturalHeight * rate/2 + moveDelta.y ,
         })
         canvas.add(this.newObj)
         this.state = JSON.stringify(canvas);
