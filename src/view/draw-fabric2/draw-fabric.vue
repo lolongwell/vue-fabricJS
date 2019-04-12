@@ -45,8 +45,8 @@
             type: 'leader'
           },
           {
-            icon: 'rect.png',
-            type: 'rect'
+            icon: 'public-room.png',
+            type: 'public-room'
           },
         ],
         movingTarget: null,// 移动对象
@@ -68,7 +68,7 @@
     mounted () {
       var _this = this
       var canvas = (this.canvas = new fabric.Canvas('c', {
-        backgroundColor: '#dae4e4'
+        backgroundColor: 'white'
       }))
       window.canvas = canvas;
       window.zoom = window.zoom ? window.zoom : 1;
@@ -181,20 +181,92 @@
         }
       },
       drawPattern (e) {
-        console.log(this.drawType)
-        var _this = this
+        let _this = this
         const { offsetX, offsetY } = e.e;
-        let {movingTarget, moveDelta} = this
-        var rate = 34 / movingTarget.naturalWidth
-        var zoom = canvas.getZoom()
-        this.newObj = new fabric.Image(movingTarget, {
-          width: movingTarget.naturalWidth,
-          height: movingTarget.naturalHeight,
-          scaleX: rate,
-          scaleY: rate,
-          left: offsetX/zoom - movingTarget.naturalWidth * rate/2 + moveDelta.x ,
-          top: offsetY/zoom - movingTarget.naturalHeight * rate/2 + moveDelta.y ,
-        })
+        let {drawType, movingTarget, moveDelta} = this
+        let rate = 34 / movingTarget.naturalWidth
+        let zoom = canvas.getZoom()
+        let left = offsetX/zoom - movingTarget.naturalWidth * rate/2 + moveDelta.x
+        let top = offsetY/zoom - movingTarget.naturalHeight * rate/2 + moveDelta.y
+        // this.newObj = new fabric.Image(movingTarget, {
+        //   width: movingTarget.naturalWidth,
+        //   height: movingTarget.naturalHeight,
+        //   scaleX: rate,
+        //   scaleY: rate,
+        //   left: offsetX/zoom - movingTarget.naturalWidth * rate/2 + moveDelta.x,
+        //   top: offsetY/zoom - movingTarget.naturalHeight * rate/2 + moveDelta.y,
+        // })
+        switch (drawType) {
+          case 'staff':
+            let rect = new fabric.Rect({
+              width: movingTarget.naturalWidth,
+              height: movingTarget.naturalHeight,
+              scaleX: _this.scale,
+              scaleY: _this.scale,
+              stroke: '#e4e4e4',
+              strokeWidth: 2,
+              fill: 'transparent',
+            })
+            let line = new fabric.Line([1,0,movingTarget.naturalWidth*_this.scale-1,0], {
+              stroke: '#b3dba7',
+              strokeWidth: 1,
+            })
+            _this.newObj = new fabric.Group([rect, line],{
+              left,
+              top
+            })
+            break;
+          case 'leader':
+            let rect1 = new fabric.Rect({
+              width: 163,
+              height: 76,
+              scaleX: _this.scale,
+              scaleY: _this.scale,
+              stroke: '#e4e4e4',
+              strokeWidth: 2,
+              fill: 'transparent',
+            })
+            let rect2 = new fabric.Rect({
+              width: 47,
+              height: 43,
+              scaleX: _this.scale,
+              scaleY: _this.scale,
+              stroke: '#e4e4e4',
+              strokeWidth: 2,
+              fill: 'transparent',
+              left: 0,
+              top: 76*_this.scale
+            })
+            let rect3 = new fabric.Rect({
+              width: 47,
+              height: 43,
+              scaleX: _this.scale,
+              scaleY: _this.scale,
+              stroke: '#e4e4e4',
+              strokeWidth: 2,
+              fill: 'transparent',
+              left: 0,
+              top: 119*_this.scale
+            })
+            _this.newObj = new fabric.Group([rect1, rect2, rect3],{
+              left,
+              top
+            })
+            break;
+          case 'public-room':
+            _this.newObj = new fabric.Rect({
+              width: 800,
+              height: 400,
+              scaleX: _this.scale,
+              scaleY: _this.scale,
+              stroke: '#848c90',
+              strokeWidth: 2,
+              fill: 'transparent',
+              left: offsetX/zoom - movingTarget.naturalWidth * rate/2 + moveDelta.x,
+              top: offsetY/zoom - movingTarget.naturalHeight * rate/2 + moveDelta.y
+            })
+            break;
+        }
         canvas.add(this.newObj)
         this.state = JSON.stringify(canvas);
       },
@@ -271,9 +343,6 @@
           // canvas.requestRenderAll();
         });
       },
-      drawStaff (config) {
-        
-      }
     },
   }
 </script>
