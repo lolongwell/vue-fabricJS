@@ -64,6 +64,8 @@ npm run build
     rotate() 设置旋转角度
     setCoords() 设置坐标
     canvas.calcViewportBoundaries() 计算画布4角的位置
+    canvas.discardActiveObject() 取消选中状态
+    canvas.setActiveObject(clonedObj) 设置选中状态
 
 ### 事件
 #### Events handled by canvas

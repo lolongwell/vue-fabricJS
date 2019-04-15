@@ -8,6 +8,7 @@
 
     <canvas id="c"></canvas>
 
+    <i-button type="primary" shape="circle" class="btn-save" @click="saveC">保存</i-button>
     <div class="tip">
       <div class="scale">
         <span>{{size}}m</span>
@@ -29,6 +30,7 @@
 
 <script>
   import {fabric} from 'fabric';
+  import 'fabric-customise-controls'
   export default {
     data () {
       return {
@@ -60,6 +62,7 @@
           x: 0,
           y: 0
         },
+        clickCnt: 1
       }
     },
     props: {
@@ -88,7 +91,85 @@
         })
         canvas.setBackgroundImage(oImg).renderAll()
       })
-     
+      // 自定义控制项
+      fabric.Canvas.prototype.customiseControls({
+        tl: {
+          action: function (e, target) {
+            canvas.getActiveObject().set('scaleX', -1).setCoords()
+            canvas.renderAll();
+          },
+          cursor: 'pointer'
+        },
+        tr: {
+          action: function (e, target) {
+            target.rotate(90*_this.clickCnt)
+            _this.clickCnt++
+            canvas.renderAll();
+          },
+          cursor: 'pointer'
+        },
+        // bl: {
+        //     action: 'remove',
+        //     cursor: 'pointer'
+        // },
+        // br: {
+        //     action: 'moveUp',
+        //     cursor: 'pointer'
+        // },
+        // mb: {
+        //     action: 'moveDown',
+        //     cursor: 'pointer'
+        // },
+        // mt: {
+        //     action: {
+        //         'rotateByDegrees': 45
+        //     }
+        // },
+        // mr: {
+        //     action: function( e, target ) {
+        //         target.set( {
+        //             left: 200
+        //         } );
+        //         canvas.renderAll();
+        //     }
+        // },
+        // mtr: {
+        //     action: 'rotate',
+        //     cursor: 'cow.png'
+        // },
+      }, function() {
+        canvas.renderAll();
+      })
+      fabric.Object.prototype.customiseCornerIcons({
+        settings: {
+          borderColor: '#ffffff',
+          cornerSize: 25,
+          cornerShape: 'circle',
+          cornerBackgroundColor: '#ffffff',
+          cornerPadding: 10
+        },
+        tl: {
+            icon: 'icons/reverse.svg'
+        },
+        tr: {
+            icon: 'icons/rotate.svg'
+        },
+        // bl: {
+        //     icon: 'icons/remove.svg'
+        // },
+        // br: {
+        //     icon: 'icons/up.svg'
+        // },
+        // mb: {
+        //     icon: 'icons/down.svg'
+        // },
+        // // only is hasRotatingPoint is not set to false
+        // mtr: {
+        //     icon: 'icons/rotate.svg'
+        // },
+      }, function() {
+        canvas.renderAll();
+      } );
       // 快捷键设置
       var body = document.querySelector("body");
       var _this = this
@@ -182,20 +263,13 @@
       },
       drawPattern (e) {
         let _this = this
+        this.clickCnt = 1
         const { offsetX, offsetY } = e.e;
         let {drawType, movingTarget, moveDelta} = this
         let rate = 34 / movingTarget.naturalWidth
         let zoom = canvas.getZoom()
         let left = offsetX/zoom - movingTarget.naturalWidth * rate/2 + moveDelta.x
         let top = offsetY/zoom - movingTarget.naturalHeight * rate/2 + moveDelta.y
-        // this.newObj = new fabric.Image(movingTarget, {
-        //   width: movingTarget.naturalWidth,
-        //   height: movingTarget.naturalHeight,
-        //   scaleX: rate,
-        //   scaleY: rate,
-        //   left: offsetX/zoom - movingTarget.naturalWidth * rate/2 + moveDelta.x,
-        //   top: offsetY/zoom - movingTarget.naturalHeight * rate/2 + moveDelta.y,
-        // })
         switch (drawType) {
           case 'staff':
             let rect = new fabric.Rect({
@@ -272,10 +346,20 @@
       },
       addNew () {
         this.newObj.on('mouseover', e => {
-          console.log('确定')
+          // console.log(e)
+          var objs = e.target.getObjects()
+          objs.forEach((item, index) => {
+            item.set('fill', 'red')
+          })
+          canvas.renderAll()
         })
         this.newObj.on('mouseout', e => {
-          console.log('取消')
+          // console.log(e)
+          var objs = e.target.getObjects()
+          objs.forEach((item, index) => {
+            item.set('fill', 'transparent')
+          })
+          canvas.renderAll()
         })
       },
       cancelAdd () {
@@ -308,6 +392,7 @@
         items.forEach(item => {
           canvas.remove(item);
         })
+        canvas.discardActiveObject();
       },
       copy() {
         var _this = this
@@ -342,6 +427,14 @@
           canvas.setActiveObject(clonedObj);
           // canvas.requestRenderAll();
         });
+      },
+      saveC () {
+        var saveJSON = JSON.stringify(canvas)
+        console.log(saveJSON)
+      },
+      loadC () {
+        var saveJSON = '{"version":"2.7.0","objects":[{"type":"group","version":"2.7.0","originX":"left","originY":"top","left":300.37,"top":346.34,"width":25.8,"height":13.6,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":0,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"clipTo":null,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","transformMatrix":null,"skewX":0,"skewY":0,"objects":[{"type":"rect","version":"2.7.0","originX":"left","originY":"top","left":-12.9,"top":-6.8,"width":127,"height":66,"fill":"transparent","stroke":"#e4e4e4","strokeWidth":2,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeMiterLimit":4,"scaleX":0.2,"scaleY":0.2,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"clipTo":null,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","transformMatrix":null,"skewX":0,"skewY":0,"rx":0,"ry":0},{"type":"line","version":"2.7.0","originX":"left","originY":"top","left":-11.9,"top":-6.8,"width":23.4,"height":0,"fill":"transparent","stroke":"#b3dba7","strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"clipTo":null,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","transformMatrix":null,"skewX":0,"skewY":0,"x1":-11.700000000000001,"x2":11.700000000000001,"y1":0,"y2":0}]}],"background":"white","backgroundImage":{"type":"image","version":"2.7.0","originX":"left","originY":"top","left":100,"top":50,"width":6682,"height":4157,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":0,"strokeDashArray":null,"strokeLineCap":"butt","strokeDashOffset":0,"strokeLineJoin":"miter","strokeMiterLimit":4,"scaleX":0.2,"scaleY":0.2,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"clipTo":null,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","transformMatrix":null,"skewX":0,"skewY":0,"crossOrigin":"","cropX":0,"cropY":0,"src":"http://localhost:8080/a1-10.png","filters":[]}}'
+        canvas.loadFromJSON(saveJSON)
       },
     },
   }
@@ -423,5 +516,10 @@
   }
   .compass img {
     width: 100%;
+  }
+  .btn-save {
+    position: fixed;
+    top: 134px;
+    right: 20px;
   }
 </style>
